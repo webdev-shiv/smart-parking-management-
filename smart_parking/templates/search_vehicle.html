@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Search Vehicle{% endblock %}
+
+{% block content %}
+<h1 class="card-title">Search Vehicles</h1>
+<p class="mb-4" style="color: var(--text-secondary);">
+    Search by vehicle number, owner name, or entry date.
+</p>
+
+<div class="card">
+    <form method="POST" action="{{ url_for('search_vehicle') }}">
+        <div class="form-row">
+            <!-- Column 1: Search By -->
+            <div class="form-group col-md-4">
+                <label for="search_type">Search By</label>
+                <select id="search_type" name="search_type" class="form-control">
+                    <option value="vehicle_number" {% if searched_type == 'vehicle_number' %}selected{% endif %}>
+                        Vehicle Number
+                    </option>
+                    <option value="owner_name" {% if searched_type == 'owner_name' %}selected{% endif %}>
+                        Owner Name
+                    </option>
+                    <!-- NEW OPTION -->
+                    <option value="contact" {% if searched_type == 'contact' %}selected{% endif %}>
+                        Contact Number
+                    </option>
+                    <!-- NEW OPTION -->
+                    <option value="vehicle_type" {% if searched_type == 'vehicle_type' %}selected{% endif %}>
+                        Vehicle Type
+                    </option>
+                    <option value="date" {% if searched_type == 'date' %}selected{% endif %}>
+                        Date (YYYY-MM-DD)
+                    </option>
+                </select>
+            </div>
+            
+            <!-- Column 2: Search Query -->
+            <div class="form-group col-md-6">
+                <label for="search_query">Search Query</label>
+                <!-- UPDATED: This input field will now be modified by JS -->
+                <input type="text" class="form-control" id="search_query" name="search_query" 
+                       placeholder="Enter query..." value="{{ searched_query or '' }}" required>
+            </div>
+            
+            <!-- Column 3: Button -->
+            <div class="form-group col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Results -->
+{% if vehicles %}
+<div class="card mt-4">
+    <h2 class="section-title">Search Results ({{ vehicles|length }})</h2>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Vehicle No.</th>
+                    <th>Owner</th>
+                    <th>Slot</th>
+                    <th>Entry Time</th>
+                    <th>Exit Time</th>
+                    <th>Fee</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vehicles %}
+                <tr>
+                    <td><strong style="color:var(--sidebar-active);">{{ v.vehicle_number }}</strong></td>
+                    <td>{{ v.owner_name }}</td>
+                    <td>{{ v.slot_number or 'N/A' }}</td>
+                    <td>{{ v.entry_time.strftime('%d %b %y, %I:%M %p') }}</td>
+                    <td>
+                        {% if v.exit_time %}
+                            {{ v.exit_time.strftime('%d %b %y, %I:%M %p') }}
+                        {% else %}
+                            <span style="color: var(--text-secondary);">Currently Parked</span>
+                        {% endif %}
+                    </td>
+                    <td>₹{{ "%.2f"|format(v.parking_fee) }}</td>
+                    <td>
+                        <a class="btn btn-outline-primary btn-sm" target="_blank"
+                           href="{{ url_for('receipt', vehicle_id=v.id) }}">
+                           <i class="fas fa-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% elif request.method == 'POST' %}
+<div class="card mt-4 text-center" style="padding: 2rem;">
+    <p style="font-size: 1.1rem; color: var(--text-secondary); margin: 0;">
+        <i class="fas fa-info-circle mr-2"></i>No vehicles found matching your search.
+    </p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // UPDATED: This script now handles more input types
+    const searchTypeSelect = document.getElementById('search_type');
+    const searchQueryInput = document.getElementById('search_query');
+
+    function updateInputType() {
+        const selectedType = searchTypeSelect.value;
+        
+        // Reset to default
+        searchQueryInput.type = 'text';
+        searchQueryInput.placeholder = 'Enter query...';
+        searchQueryInput.removeAttribute('list'); // Remove datalist if it exists
+
+        if (selectedType === 'date') {
+            searchQueryInput.type = 'date';
+            searchQueryInput.placeholder = 'YYYY-MM-DD';
+        } else if (selectedType === 'contact') {
+            searchQueryInput.type = 'tel';
+            searchQueryInput.placeholder = 'Enter 10-digit number...';
+        } else if (selectedType === 'vehicle_type') {
+            searchQueryInput.placeholder = 'e.g., Car, Bike...';
+            // Optional: Add a datalist for suggestions
+            searchQueryInput.setAttribute('list', 'vehicle-types');
+        }
+    }
+
+    // Run on page load in case the form is re-loaded
+    updateInputType();
+
+    // Run when the user changes the selection
+    searchTypeSelect.addEventListener('change', updateInputType);
+</script>
+
+<!-- Optional: Datalist for vehicle_type suggestions -->
+<datalist id="vehicle-types">
+    <option value="Car">
+    <option value="Bike">
+    <option value="SUV">
+    <option value="Van">
+</datalist>
+{% endblock %}
+

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Set Parking Fare{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title"><i class="fas fa-dollar-sign"></i> Set Parking Fare</h2>
+    <p class="text-secondary mb-4">Set the hourly parking rate for each vehicle type.</p>
+
+    <form method="POST">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="fare_Car" style="font-weight: 600;">🚗 Car Fare (₹/hr)</label>
+                <input type="number" class="form-control" id="fare_Car" name="fare_Car" 
+                       value="{{ fares.Car }}" required min="0">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="fare_Bike" style="font-weight: 600;">🏍️ Bike Fare (₹/hr)</label>
+                <input type="number" class="form-control" id="fare_Bike" name="fare_Bike" 
+                       value="{{ fares.Bike }}" required min="0">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="fare_SUV" style="font-weight: 600;">🚙 SUV Fare (₹/hr)</label>
+                <input type="number" class="form-control" id="fare_SUV" name="fare_SUV" 
+                       value="{{ fares.SUV }}" required min="0">
+            </div>
+            <div class="form-group col-md-6">
+                <label for="fare_Van" style="font-weight: 600;">🚐 Van Fare (₹/hr)</label>
+                <input type="number" class="form-control" id="fare_Van" name="fare_Van" 
+                       value="{{ fares.Van }}" required min="0">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">
+            <i class="fas fa-save"></i> Save All Fares
+        </button>
+    </form>
+</div>
+{% endblock %}
+

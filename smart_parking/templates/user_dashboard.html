@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}My Dashboard - Smart Parking{% endblock %}
+
+{% block extra_css %}
+<style>
+.vehicles-list {
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+.section-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+.btn-sm {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+}
+.vehicle-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--sidebar-active);
+  padding: 0.4rem 0.75rem;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.status-parked {
+    color: #059669;
+    font-weight: 600;
+}
+.status-exited {
+    color: var(--text-secondary);
+}
+.no-vehicles-cta {
+    text-align:center; 
+    color: var(--text-secondary); 
+    margin-top:2rem;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="card-title" style="font-size: 2.5rem; font-weight: 800; color: var(--text-primary);">
+  My Dashboard
+</h1>
+<p class="mb-4" style="font-size: 1.15rem; color: var(--text-secondary);">
+  Welcome back, {{ session.username }}! Manage your parked vehicles below.
+</p>
+
+<div class="vehicles-list card">
+  <h2 class="section-title"><i class="fas fa-car"></i> My Vehicles</h2>
+  {% if vehicles %}
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Vehicle No.</th>
+          <th>Slot</th>
+          <th>Entry Time</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in vehicles %}
+        <tr>
+          <td><strong style="color:var(--sidebar-active);">{{ v.vehicle_number }}</strong></td>
+          <td><span class="vehicle-badge"><i class="fas fa-parking"></i> {{ v.slot_number or 'N/A' }}</span></td>
+          <td>{{ v.entry_time.strftime('%d %b, %I:%M %p') }}</td>
+          <td>
+              {% if v.exit_time is none %}
+                  <span class="status-parked">Parked</span>
+              {% else %}
+                  <span class="status-exited">Exited on {{ v.exit_time.strftime('%d %b') }}</span>
+              {% endif %}
+          </td>
+          <td>
+            {% if v.exit_time is none %}
+                <!-- Vehicle is currently parked -->
+                <button class="btn btn-outline-primary btn-sm" onclick="previewFare({{ v.id }})">
+                    <i class="fas fa-calculator"></i> Check Fare
+                </button>
+                <a class="btn btn-outline-danger btn-sm" target="_blank"
+                   href="{{ url_for('receipt', vehicle_id=v.id) }}?finalize=1"
+                   onclick="return confirm('Are you sure you want to exit this vehicle and open the receipt?')">
+                   <i class="fas fa-receipt"></i> Exit & Pay
+                </a>
+            {% else %}
+                <!-- Vehicle has already exited -->
+                <a class="btn btn-outline-secondary btn-sm" target="_blank"
+                   href="{{ url_for('receipt', vehicle_id=v.id) }}">
+                   <i class="fas fa-eye"></i> View Receipt
+                </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="no-vehicles-cta">
+    <p class="mb-3">You have no parked vehicles.</p>
+    <a href="{{ url_for('add_vehicle') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Park a New Vehicle
+    </a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewFare(vehicleId){
+  fetch('/calculate_fare', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vehicle_id: vehicleId })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.error){ 
+        alert('Error: ' + data.error); 
+        return; 
+    }
+    const msg = `🕒 Duration: ${data.hours} hour(s)\n💸 Rate: ₹${data.fare_per_hour}/hr\n💰 Total Due: ₹${data.total_fare.toFixed(2)}`;
+    
+    if (window.confirm(msg + "\n\nPreview receipt (this will not finalize the exit)?")){
+        window.open('/receipt/' + vehicleId, '_blank');
+    }
+  })
+  .catch(e => {
+      console.error('Failed to calculate fare:', e);
+      alert('Failed to calculate fare: ' + e);
+  });
+}
+</script>
+{% endblock %}
+

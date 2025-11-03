@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Parking Reports{% endblock %}
+
+{% block content %}
+<div class="card">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="card-title" style="margin: 0;"><i class="fas fa-file-alt"></i> Parking History Report</h2>
+        
+        <!-- NEW: Export to CSV Button -->
+        <a href="{{ url_for('export_report') }}" class="btn btn-success">
+            <i class="fas fa-download"></i> Export to CSV
+        </a>
+    </div>
+    <p class="text-secondary mb-4">View a complete history of all parked vehicles.</p>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>Vehicle No.</th>
+                    <th>Owner</th>
+                    <th>Slot</th>
+                    <th>Entry Time</th>
+                    <th>Exit Time</th>
+                    <th>Fee (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td><strong>{{ record.vehicle_number }}</strong></td>
+                    <td>{{ record.owner_name }}</td>
+                    <td>{{ record.slot_number or 'N/A' }}</td>
+                    <td>{{ record.entry_time.strftime('%d %b %y, %I:%M %p') if record.entry_time else 'N/A' }}</td>
+                    <td>{{ record.exit_time.strftime('%d %b %y, %I:%M %p') if record.exit_time else 'N/A' }}</td>
+                    <td>₹{{ '%.2f'|format(record.parking_fee) if record.parking_fee is not none else 'N/A' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #666; padding: 2rem;">No records found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

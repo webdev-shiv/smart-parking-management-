@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Search by Slot - Smart Parking{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2 class="card-title"><i class="fas fa-search-location"></i> Search by Slot Number</h2>
+    <p class="text-secondary mb-4">Find all vehicles that have parked in a specific slot.</p>
+
+    <form method="POST" class="form-inline">
+        <div class="form-group mx-sm-3 mb-2">
+            <label for="slot_number" class="sr-only">Slot Number</label>
+            <input type="text" class="form-control" id="slot_number" name="slot_number" placeholder="Enter Slot (e.g., A1)" style="text-transform: uppercase;">
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </form>
+
+    {% if request.method == 'POST' %}
+        <hr style="margin: 2.5rem 0;">
+        <h3 style="font-weight: 600; margin-bottom: 1.5rem;">Search Results for Slot "{{ request.form.slot_number }}"</h3>
+        
+        {% if vehicles %}
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle No.</th>
+                        <th>Owner</th>
+                        <th>Entry Time</th>
+                        <th>Exit Time</th>
+                        <th>Fee (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in vehicles %}
+                    <tr>
+                        <td><strong>{{ v.vehicle_number }}</strong></td>
+                        <td>{{ v.owner_name }}</td>
+                        <td>{{ v.entry_time.strftime('%d %b %y, %I:%M %p') }}</td>
+                        <td>{{ v.exit_time.strftime('%d %b %y, %I:%M %p') if v.exit_time else 'Parked' }}</td>
+                        <td>₹{{ '%.2f'|format(v.parking_fee) if v.parking_fee is not none else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                No vehicles found for that slot number.
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-format slot number to uppercase
+    document.getElementById('slot_number').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase();
+    });
+</script>
+{% endblock %}
+

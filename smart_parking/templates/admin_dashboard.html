@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Smart Parking{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ======== Stat Cards ======== */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+.stat-link {
+    text-decoration: none;
+    color: inherit;
+}
+.stat-link:hover {
+    text-decoration: none;
+    color: inherit;
+}
+.stat-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+  border: 1px solid var(--border-color);
+}
+.stat-link:hover .stat-card {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 10px 24px rgba(41, 128, 185, 0.2);
+  border-color: var(--sidebar-active);
+}
+.stat-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.75rem;
+}
+.stat-content h3 {
+  font-size: 2.25rem;
+  margin: 0;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.stat-content p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.stat-icon.blue { background: linear-gradient(135deg,#3b82f6,#2563eb); }
+.stat-icon.green { background: linear-gradient(135deg,#10b981,#059669); }
+.stat-icon.orange { background: linear-gradient(135deg,#f59e0b,#d97706); }
+.stat-icon.purple { background: linear-gradient(135deg,#8b5cf6,#7c3aed); }
+
+/* ======== Slots Section ======== */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+.legend {
+  display: flex;
+  gap: 1rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.legend-color {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+}
+.slots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.slot-bay {
+    background: #fff;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0.75rem;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+.slot-bay:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.07);
+}
+
+.slot-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+}
+.slot-number {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+}
+.slot-type-icon {
+    font-size: 1.25rem;
+    opacity: 0.7;
+}
+
+.slot-status-icon {
+    text-align: center;
+    font-size: 2.5rem;
+    line-height: 1;
+}
+.slot-bay.empty {
+    border-color: #10b981;
+    background: #f0fdf4;
+}
+.slot-bay.empty .slot-number { color: #065f46; }
+.slot-bay.empty .slot-status-icon { color: #10b981; }
+
+.slot-bay.occupied {
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+.slot-bay.occupied .slot-number { color: #b91c1c; }
+.slot-bay.occupied .slot-status-icon { color: #ef4444; }
+
+.vehicle-info {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #b91c1c;
+    text-align: center;
+    line-height: 1.2;
+    margin-top: 0.25rem;
+}
+.slot-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 105%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    width: max-content;
+    z-index: 10;
+    pointer-events: none;
+}
+.slot-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+.slot-bay.occupied:hover .slot-tooltip {
+    display: block;
+}
+.vehicle-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--sidebar-active);
+  padding: 0.4rem 0.75rem;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.btn-sm {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 6px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="card-title" style="font-size: 2.5rem; font-weight: 800; color: var(--text-primary);">
+  Welcome, {{ session.username }}!
+</h1>
+<p class="mb-4" style="font-size: 1.15rem; color: var(--text-secondary);">
+  Here's a real-time overview of your parking facility.
+</p>
+
+<!-- ======== CLICKABLE STATS ======== -->
+<div class="stats-grid">
+  <a href="{{ url_for('manage_slots') }}" class="stat-link" title="Manage all slots">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="fas fa-th-large"></i></div>
+      <div class="stat-content">
+        <h3>{{ total_slots }}</h3><p>Total Slots</p>
+      </div>
+    </div>
+  </a>
+  <a href="{{ url_for('add_vehicle') }}" class="stat-link" title="Park a new vehicle">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+      <div class="stat-content">
+        <h3>{{ empty_slots }}</h3><p>Available</p>
+      </div>
+    </div>
+  </a>
+  <a href="#currently-parked" class="stat-link" title="View occupied slots">
+    <div class="stat-card">
+      <div class="stat-icon orange"><i class="fas fa-car-side"></i></div>
+      <div class="stat-content">
+        <h3>{{ occupied_slots }}</h3><p>Occupied</p>
+      </div>
+    </div>
+  </a>
+  <a href="{{ url_for('reports_page') }}" class="stat-link" title="View revenue reports">
+    <div class="stat-card">
+      <div class="stat-icon purple"><i class="fas fa-rupee-sign"></i></div>
+      <div class="stat-content">
+        <h3>₹{{ "%.2f"|format(today_revenue) }}</h3><p>Today's Revenue</p>
+      </div>
+    </div>
+  </a>
+</div>
+
+<!-- ======== TWO COLUMN LAYOUT ======== -->
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="section-header">
+              <h2 class="section-title"><i class="fas fa-parking"></i> Parking Layout</h2>
+              <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background:#f0fdf4; border: 2px solid #10b981;"></div>Available</div>
+                <div class="legend-item"><div class="legend-color" style="background:#fef2f2; border: 2px solid #ef4444;"></div>Occupied</div>
+              </div>
+            </div>
+
+            <div class="slots-grid">
+              {% for slot in slots %}
+              {% set vehicle = parked_vehicles_map.get(slot.id) %}
+              <div class="slot-bay {{ slot.status }}">
+                  <div class="slot-info">
+                      <span class="slot-number">{{ slot.slot_number }}</span>
+                      <span class="slot-type-icon">
+                          {% if slot.slot_type == 'Car' %} 🚗
+                          {% elif slot.slot_type == 'Bike' %} 🏍️
+                          {% elif slot.slot_type == 'SUV' %} 🚙
+                          {% elif slot.slot_type == 'Van' %} 🚐
+                          {% endif %}
+                      </span>
+                  </div>
+                  
+                  {% if vehicle %}
+                      <div class="vehicle-info">{{ vehicle.vehicle_number }}</div>
+                      <div class="slot-tooltip">
+                          <strong>Owner:</strong> {{ vehicle.owner_name }}<br>
+                          <strong>Entry:</strong> {{ vehicle.entry_time.strftime('%I:%M %p') }}
+                      </div>
+                  {% else %}
+                      <div class="slot-status-icon">
+                          <i class="fas fa-check"></i>
+                      </div>
+                  {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card">
+             <div class="section-header">
+                <h2 class="section-title"><i class="fas fa-chart-bar"></i> Revenue Analytics</h2>
+            </div>
+            <div class="btn-group btn-group-toggle d-flex mb-3" data-toggle="buttons">
+                <label class="btn btn-outline-primary btn-sm w-100" onclick="loadChart('today')">
+                    <input type="radio" name="options" id="option1"> Today
+                </label>
+                <label class="btn btn-outline-primary btn-sm w-100 active" onclick="loadChart('week')">
+                    <input type="radio" name="options" id="option2" checked> Week
+                </label>
+                <label class="btn btn-outline-primary btn-sm w-100" onclick="loadChart('month')">
+                    <input type="radio" name="options" id="option3"> Month
+                </label>
+            </div>
+            <canvas id="revenueChart" style="width:100%; max-height:320px;"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ======== VEHICLES TABLE ======== -->
+<div class="card" id="currently-parked">
+  <h2 class="section-title"><i class="fas fa-history"></i> Currently Parked Vehicles</h2>
+  {% if recent_vehicles and recent_vehicles|selectattr('exit_time','none')|list %}
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Vehicle No.</th><th>Owner</th><th>Contact</th>
+          <th>Slot</th><th>Entry Time</th><th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for v in recent_vehicles if v.exit_time is none %}
+        <tr>
+          <td><strong style="color:var(--sidebar-active);">{{ v.vehicle_number }}</strong></td>
+          <td>{{ v.owner_name }}</td>
+          <td>{{ v.contact }}</td>
+          <td><span class="vehicle-badge"><i class="fas fa-parking"></i> {{ v.slot_number }}</span></td>
+          <td>{{ v.entry_time.strftime('%d %b, %I:%M %p') }}</td>
+          <td>
+            <button class="btn btn-outline-primary btn-sm" onclick="previewFare({{ v.id }})">
+              <i class="fas fa-calculator"></i> Fare
+            </button>
+            <a class="btn btn-outline-danger btn-sm" target="_blank"
+               href="{{ url_for('receipt', vehicle_id=v.id) }}?finalize=1"
+               onclick="return confirm('Finalize exit and open receipt?')">
+               <i class="fas fa-receipt"></i> Exit
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="text-align:center; color:var(--text-secondary); margin-top:1rem;">No vehicles currently parked.</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// --- Smooth scroll for 'Occupied' tile ---
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+});
+
+// --- Preview Fare Modal ---
+function previewFare(vehicleId){
+  fetch('/calculate_fare', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vehicle_id: vehicleId })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if(data.error){ alert('Error: ' + data.error); return; }
+    const msg = `🕒 Duration: ${data.hours} hour(s)\n💸 Rate: ₹${data.fare_per_hour}/hr\n💰 Total Due: ₹${data.total_fare.toFixed(2)}`;
+    if(confirm(msg + "\n\nPreview receipt (this will not finalize the exit)?")){
+      window.open('/receipt/' + vehicleId, '_blank');
+    }
+  })
+  .catch(e => alert('Failed to calculate fare: ' + e)); /* <-- THIS IS THE FIX */
+}
+
+// --- Revenue Chart ---
+let myChart;
+async function loadChart(period) {
+    try {
+        const response = await fetch(`/api/revenue_data/${period}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        if (myChart) { myChart.destroy(); }
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: data.values,
+                    backgroundColor: 'rgba(41, 128, 185, 0.6)',
+                    borderColor: 'rgba(41, 128, 185, 1)',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: data.title, font: { size: 16 } },
+                    legend: { display: false }
+                },
+                scales: { y: { beginAtZero: true, ticks: { callback: function(value) { return '₹' + value; } } } }
+            }
+        });
+    } catch (error) { console.error('Failed to load chart data:', error); }
+}
+document.addEventListener('DOMContentLoaded', () => { loadChart('week'); });
+
+
+// --- NEW REAL-TIME LOGIC ---
+try {
+    // This script was included in base.html, so 'io' is defined
+    var socket = io(); // Connect to the Socket.IO server
+    
+    // Listen for the 'parking_updated' event
+    socket.on('parking_updated', function(data) {
+        console.log('Parking data updated!', data.message);
+        
+        // Show a temporary "Reloading..." toast/alert
+        let toast = document.getElementById('live-update-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'live-update-toast';
+            toast.style = "position: fixed; top: 20px; right: 20px; background: #2ecc71; color: white; padding: 1rem; border-radius: 8px; z-index: 1000; font-weight: 600;";
+            document.body.appendChild(toast);
+        }
+        toast.innerText = 'Live update received. Refreshing...';
+        toast.style.display = 'block';
+
+        // Reload the page to get the new stats and layout
+        setTimeout(() => {
+            location.reload();
+        }, 1000); // Wait 1 sec before reloading
+    });
+
+    socket.on('connect_error', (err) => {
+        // Log connection errors for debugging
+        console.error('Socket.IO connection error:', err.message);
+    });
+
+} catch (e) {
+    console.error('Socket.IO failed to initialize:', e);
+}
+</script>
+{% endblock %}
+

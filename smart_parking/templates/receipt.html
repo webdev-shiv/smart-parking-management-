@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - Smart Parking</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Google Font: Inter & Roboto Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary-color: #2980b9;
+    --text-primary: #212529;
+    --text-secondary: #6c757d;
+    --border-color: #dee2e6;
+}
+body {
+    background: #f8f9fa;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-primary);
+}
+.receipt-wrapper {
+    max-width: 600px;
+    margin: 2.5rem auto;
+}
+.receipt-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  border: 1px solid var(--border-color);
+}
+.receipt-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px dashed var(--border-color);
+}
+.brand {
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+.brand-icon {
+    width:50px;
+    height:50px;
+    border-radius:12px;
+    background: var(--primary-color);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size: 1.5rem;
+}
+.brand h2 { 
+    margin:0; 
+    font-size: 1.5rem; 
+    font-weight: 700;
+    color: var(--primary-color); 
+}
+.meta { 
+    text-align:right; 
+    color: var(--text-secondary); 
+    font-size:0.9rem; 
+}
+.meta strong {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.details-grid { 
+    margin-top:1.5rem; 
+    display:flex; 
+    gap: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.details-grid .col { 
+    flex:1; 
+}
+.details-grid h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
+}
+.details-grid div {
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+    color: var(--text-secondary);
+}
+.details-grid div strong {
+    color: var(--text-primary);
+    font-weight: 600;
+    min-width: 70px;
+    display: inline-block;
+}
+
+.line-items { 
+    width:100%; 
+    border-collapse: collapse; 
+    margin-top: 1.5rem; 
+}
+.line-items th {
+    text-align: left;
+    padding: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    border-bottom: 2px solid var(--border-color);
+}
+.line-items td { 
+    padding: 0.75rem 0; 
+    border-bottom: 1px dashed #e6e6e6;
+    font-weight: 500;
+}
+.total-row td { 
+    font-weight: 700; 
+    font-size: 1.25rem; 
+    padding-top: 1rem;
+    color: var(--text-primary);
+}
+.total-row .total-label {
+    text-transform: uppercase;
+    font-size: 1rem;
+}
+
+.receipt-footer {
+    margin-top: 2rem; 
+    display:flex; 
+    justify-content:space-between; 
+    align-items:center;
+}
+.print-button {
+    text-align: right;
+    margin-top: 1.5rem;
+}
+.btn-print {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+    font-weight: 600;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+}
+
+@media print {
+  body { 
+    background: white !important; 
+    color: #000;
+  }
+  .receipt-wrapper { 
+      margin: 0; 
+      max-width: 100%;
+  }
+  .receipt-card { 
+      box-shadow:none; 
+      border: none;
+      padding: 0;
+  }
+  .print-button { 
+      display:none !important; 
+  }
+  .receipt-footer {
+      justify-content: center;
+      text-align: center;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="receipt-wrapper">
+    <div class="receipt-card">
+        <div class="receipt-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <i class="fas fa-parking"></i>
+                </div>
+                <div>
+                  <h2>Smart Parking</h2>
+                  <div style="color: var(--text-secondary);">Parking Receipt</div>
+                </div>
+            </div>
+            <div class="meta">
+                <div><strong>Date:</strong> {{ exit_time or "" }}</div>
+                <div style="font-family: 'Roboto Mono', monospace;">ID: R-{{ vehicle.id }}</div>
+            </div>
+        </div>
+
+        <div class="details-grid">
+            <div class="col">
+                <h4>Vehicle</h4>
+                <div><strong>Number:</strong> {{ vehicle.vehicle_number }}</div>
+                <div><strong>Owner:</strong> {{ vehicle.owner_name }}</div>
+                <div><strong>Contact:</strong> {{ vehicle.contact }}</div>
+            </div>
+            <div class="col">
+                <h4>Parking</h4>
+                <div><strong>Slot:</strong> {{ slot_number or 'N/A' }}</div>
+                <div><strong>Entry:</strong> {{ entry_time }}</div>
+                <div><strong>Exit:</strong> {{ exit_time }}</div>
+            </div>
+        </div>
+
+        <table class="line-items">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align:right">Amount (₹)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        Parking Charge ({{ hours }} hr × ₹{{ fare_per_hour }}/hr)
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">{{ vehicle.vehicle_type }} Rate</div>
+                    </td>
+                    <td style="text-align:right">₹{{ '%.2f'|format(total_fare) }}</td>
+                </tr>
+                <tr class="total-row">
+                    <td class="total-label">Total Due</td>
+                    <td style="text-align:right">₹{{ '%.2f'|format(total_fare) }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="receipt-footer">
+            <div style="color: var(--text-secondary); font-size: 0.9rem;">Thank you for using Smart Parking!</div>
+        </div>
+    </div>
+    
+    <div class="print-button">
+        <a href="#" onclick="window.print(); return false;" class="btn btn-print">
+            <i class="fas fa-print"></i> Print Receipt
+        </a>
+    </div>
+</div>
+
+</body>
+</html>
+

@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+
+{% block title %}Add Vehicle - Smart Parking{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* The custom styles from your original file are great, let's keep them */
+    .page-wrapper {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    /* Remove page-header, it's replaced by the card-title */
+    .page-header { display: none; }
+
+    .form-card {
+        padding: 2.5rem;
+    }
+
+    .info-banner {
+        background: #e9f7eb; /* Light green */
+        border-left: 4px solid #28a745; /* Green */
+        padding: 1.5rem;
+        margin-bottom: 2.5rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .info-banner-icon {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #28a745;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .info-banner-content h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #155724; /* Dark green */
+        margin-bottom: 0.25rem;
+    }
+
+    .info-banner-content p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        margin: 0;
+    }
+
+    .form-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .section-title i {
+        color: var(--sidebar-active);
+    }
+
+    .input-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1.25rem;
+        top: calc(50% + 8px); /* Adjust for label */
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1rem;
+        z-index: 3;
+    }
+
+    .input-group .form-control {
+        padding-left: 3rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    select.form-control {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M8 10.5L3 5.5h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 3rem;
+    }
+
+    .vehicle-type-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+    }
+
+    .vehicle-type-option {
+        position: relative;
+    }
+
+    .vehicle-type-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .vehicle-type-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.5rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+    }
+
+    .vehicle-type-label:hover {
+        border-color: var(--sidebar-active);
+        background: white;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+    }
+
+    .vehicle-type-option input[type="radio"]:checked + .vehicle-type-label {
+        border-color: var(--sidebar-active);
+        background: #eaf3f8;
+        color: var(--sidebar-active);
+        box-shadow: 0 4px 10px rgba(41, 128, 185, 0.1);
+    }
+    .vehicle-type-option input[type="radio"]:focus + .vehicle-type-label {
+        box-shadow: 0 0 0 3px rgba(41, 128, 185, 0.2);
+    }
+
+    .vehicle-type-icon {
+        font-size: 2.5rem;
+    }
+
+    .vehicle-type-name {
+        font-weight: 700;
+        font-size: 0.875rem;
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 2px solid var(--border-color);
+    }
+
+    .form-actions .btn {
+        flex: 1;
+        font-size: 1.125rem;
+    }
+
+    .btn-secondary {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        color: var(--text-primary);
+    }
+    .btn-secondary:hover {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        .vehicle-type-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+
+    <div class="form-card card">
+        <h1 class="card-title">Park a New Vehicle</h1>
+
+        <div class="info-banner">
+            <div class="info-banner-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="info-banner-content">
+                <h3>Automatic Slot Assignment</h3>
+                <p>Our system will automatically assign the next available parking slot based on vehicle type.</p>
+            </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('add_vehicle') }}">
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-car"></i> Vehicle Information
+                </h3>
+
+                <div class="input-group">
+                    <label for="vehicle_number">Vehicle Registration Number *</label>
+                    <i class="fas fa-hashtag input-icon"></i>
+                    <input type="text" class="form-control" id="vehicle_number" name="vehicle_number" 
+                           required placeholder="e.g., DL01AB1234" style="text-transform: uppercase;">
+                </div>
+
+                <div class="input-group">
+                    <label>Vehicle Type *</label>
+                    <div class="vehicle-type-grid">
+                        <div class="vehicle-type-option">
+                            <input type="radio" id="car" name="vehicle_type" value="Car" required>
+                            <label for="car" class="vehicle-type-label">
+                                <div class="vehicle-type-icon">🚗</div>
+                                <div class="vehicle-type-name">Car</div>
+                            </label>
+                        </div>
+                        <div class="vehicle-type-option">
+                            <input type="radio" id="bike" name="vehicle_type" value="Bike">
+                            <label for="bike" class="vehicle-type-label">
+                                <div class="vehicle-type-icon">🏍️</div>
+                                <div class="vehicle-type-name">Bike</div>
+                            </label>
+                        </div>
+                        <div class="vehicle-type-option">
+                            <input type="radio" id="suv" name="vehicle_type" value="SUV">
+                            <label for="suv" class="vehicle-type-label">
+                                <div class="vehicle-type-icon">🚙</div>
+                                <div class="vehicle-type-name">SUV</div>
+                            </label>
+                        </div>
+                        <div class="vehicle-type-option">
+                            <input type="radio" id="van" name="vehicle_type" value="Van">
+                            <label for="van" class="vehicle-type-label">
+                                <div class="vehicle-type-icon">🚐</div>
+                                <div class="vehicle-type-name">Van</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-user"></i> Owner Details
+                </h3>
+
+                <div class="input-group">
+                    <label for="owner_name">Owner Full Name *</label>
+                    <i class="fas fa-user input-icon"></i>
+                    <input type="text" class="form-control" id="owner_name" name="owner_name" 
+                           required placeholder="Enter owner's full name">
+                </div>
+
+                <div class="input-group">
+                    <label for="contact">Contact Number *</label>
+                    <i class="fas fa-phone input-icon"></i>
+                    <input type="tel" class="form-control" id="contact" name="contact" 
+                           required placeholder="10-digit mobile number" pattern="[0-9]{10}" maxlength="10">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-parking"></i> Park Vehicle
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-format vehicle number to uppercase
+    document.getElementById('vehicle_number').addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase();
+    });
+
+    // Validate phone number
+    document.getElementById('contact').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+    });
+</script>
+{% endblock %}
+
